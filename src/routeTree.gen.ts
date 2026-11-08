@@ -10,33 +10,128 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CategoriesRouteImport } from './routes/categories'
+import { Route as CookingSimulatorRouteImport } from './routes/cooking-simulator'
+import { Route as CostCalculatorRouteImport } from './routes/cost-calculator'
+import { Route as FavoritesRouteImport } from './routes/favorites'
+import { Route as MyRecipesRouteImport } from './routes/my-recipes'
+import { Route as RecipesIndexRouteImport } from './routes/recipes.index'
+import { Route as RecipesRecipeIdRouteImport } from './routes/recipes.$recipeId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CategoriesRoute = CategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CookingSimulatorRoute = CookingSimulatorRouteImport.update({
+  id: '/cooking-simulator',
+  path: '/cooking-simulator',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CostCalculatorRoute = CostCalculatorRouteImport.update({
+  id: '/cost-calculator',
+  path: '/cost-calculator',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FavoritesRoute = FavoritesRouteImport.update({
+  id: '/favorites',
+  path: '/favorites',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyRecipesRoute = MyRecipesRouteImport.update({
+  id: '/my-recipes',
+  path: '/my-recipes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecipesIndexRoute = RecipesIndexRouteImport.update({
+  id: '/recipes/',
+  path: '/recipes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecipesRecipeIdRoute = RecipesRecipeIdRouteImport.update({
+  id: '/recipes/$recipeId',
+  path: '/recipes/$recipeId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/categories': typeof CategoriesRoute
+  '/cooking-simulator': typeof CookingSimulatorRoute
+  '/cost-calculator': typeof CostCalculatorRoute
+  '/favorites': typeof FavoritesRoute
+  '/my-recipes': typeof MyRecipesRoute
+  '/recipes/$recipeId': typeof RecipesRecipeIdRoute
+  '/recipes/': typeof RecipesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/categories': typeof CategoriesRoute
+  '/cooking-simulator': typeof CookingSimulatorRoute
+  '/cost-calculator': typeof CostCalculatorRoute
+  '/favorites': typeof FavoritesRoute
+  '/my-recipes': typeof MyRecipesRoute
+  '/recipes/$recipeId': typeof RecipesRecipeIdRoute
+  '/recipes': typeof RecipesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/categories': typeof CategoriesRoute
+  '/cooking-simulator': typeof CookingSimulatorRoute
+  '/cost-calculator': typeof CostCalculatorRoute
+  '/favorites': typeof FavoritesRoute
+  '/my-recipes': typeof MyRecipesRoute
+  '/recipes/$recipeId': typeof RecipesRecipeIdRoute
+  '/recipes/': typeof RecipesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/categories'
+    | '/cooking-simulator'
+    | '/cost-calculator'
+    | '/favorites'
+    | '/my-recipes'
+    | '/recipes/$recipeId'
+    | '/recipes/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/categories'
+    | '/cooking-simulator'
+    | '/cost-calculator'
+    | '/favorites'
+    | '/my-recipes'
+    | '/recipes/$recipeId'
+    | '/recipes'
+  id:
+    | '__root__'
+    | '/'
+    | '/categories'
+    | '/cooking-simulator'
+    | '/cost-calculator'
+    | '/favorites'
+    | '/my-recipes'
+    | '/recipes/$recipeId'
+    | '/recipes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CategoriesRoute: typeof CategoriesRoute
+  CookingSimulatorRoute: typeof CookingSimulatorRoute
+  CostCalculatorRoute: typeof CostCalculatorRoute
+  FavoritesRoute: typeof FavoritesRoute
+  MyRecipesRoute: typeof MyRecipesRoute
+  RecipesRecipeIdRoute: typeof RecipesRecipeIdRoute
+  RecipesIndexRoute: typeof RecipesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +143,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/categories': {
+      id: '/categories'
+      path: '/categories'
+      fullPath: '/categories'
+      preLoaderRoute: typeof CategoriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cooking-simulator': {
+      id: '/cooking-simulator'
+      path: '/cooking-simulator'
+      fullPath: '/cooking-simulator'
+      preLoaderRoute: typeof CookingSimulatorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cost-calculator': {
+      id: '/cost-calculator'
+      path: '/cost-calculator'
+      fullPath: '/cost-calculator'
+      preLoaderRoute: typeof CostCalculatorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/favorites': {
+      id: '/favorites'
+      path: '/favorites'
+      fullPath: '/favorites'
+      preLoaderRoute: typeof FavoritesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-recipes': {
+      id: '/my-recipes'
+      path: '/my-recipes'
+      fullPath: '/my-recipes'
+      preLoaderRoute: typeof MyRecipesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recipes/': {
+      id: '/recipes/'
+      path: '/recipes'
+      fullPath: '/recipes/'
+      preLoaderRoute: typeof RecipesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recipes/$recipeId': {
+      id: '/recipes/$recipeId'
+      path: '/recipes/$recipeId'
+      fullPath: '/recipes/$recipeId'
+      preLoaderRoute: typeof RecipesRecipeIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CategoriesRoute: CategoriesRoute,
+  CookingSimulatorRoute: CookingSimulatorRoute,
+  CostCalculatorRoute: CostCalculatorRoute,
+  FavoritesRoute: FavoritesRoute,
+  MyRecipesRoute: MyRecipesRoute,
+  RecipesRecipeIdRoute: RecipesRecipeIdRoute,
+  RecipesIndexRoute: RecipesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

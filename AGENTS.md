@@ -28,3 +28,7 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Architecture
+- UI reads recipe data only through `src/lib/recipe-service.ts`; swap its internals for database calls later without touching components.
+- Favorites and My Recipes drafts are session-only React state (no fake persistence) until a backend phase.
