@@ -43,9 +43,9 @@ function food(
   return {
     id, name, categories, region, mainIngredients, methods, tastes, price, description,
     ingredients: ingredients.split(",").map((s) => s.trim()),
-    aliases: extra.aliases,
-    featured: extra.featured,
     popularity: extra.popularity ?? 60,
+    ...(extra.aliases ? { aliases: extra.aliases } : {}),
+    ...(extra.featured ? { featured: true } : {}),
   };
 }
 
