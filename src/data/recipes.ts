@@ -6,15 +6,6 @@ import pinakbet from "@/assets/pinakbet.jpg";
 import pancit from "@/assets/pancit.jpg";
 import lecheFlan from "@/assets/leche-flan.jpg";
 
-export type CategoryId = "ulam" | "sabaw" | "gulay" | "pancit" | "panghimagas";
-
-export interface Category {
-  id: CategoryId;
-  name: string;
-  tagalog: string;
-  description: string;
-}
-
 export interface Ingredient {
   name: string;
   quantity: number;
@@ -28,7 +19,6 @@ export interface Recipe {
   name: string;
   tagline: string;
   description: string;
-  category: CategoryId;
   region: string;
   image: string;
   servings: number;
@@ -41,21 +31,12 @@ export interface Recipe {
   steps: string[];
 }
 
-export const categories: Category[] = [
-  { id: "ulam", name: "Main Dishes", tagalog: "Ulam", description: "Hearty viands best with rice." },
-  { id: "sabaw", name: "Soups", tagalog: "Sabaw", description: "Comforting broths for rainy days." },
-  { id: "gulay", name: "Vegetables", tagalog: "Gulay", description: "Garden-fresh Filipino favorites." },
-  { id: "pancit", name: "Noodles", tagalog: "Pancit", description: "Long noodles for long life." },
-  { id: "panghimagas", name: "Desserts", tagalog: "Panghimagas", description: "Sweet endings to every meal." },
-];
-
 export const recipes: Recipe[] = [
   {
     id: "adobo",
     name: "Chicken Pork Adobo",
     tagline: "The unofficial national dish",
     description: "Chicken and pork braised in soy sauce, vinegar, garlic, bay leaves and peppercorns until tender and glossy.",
-    category: "ulam",
     region: "Nationwide",
     image: adobo,
     servings: 4,
@@ -86,7 +67,6 @@ export const recipes: Recipe[] = [
     name: "Sinigang na Baboy",
     tagline: "Sour tamarind comfort soup",
     description: "Pork simmered in a tangy tamarind broth with kangkong, radish, tomatoes and long green chili.",
-    category: "sabaw",
     region: "Luzon",
     image: sinigang,
     servings: 5,
@@ -118,7 +98,6 @@ export const recipes: Recipe[] = [
     name: "Chicken Tinola",
     tagline: "Gingery soup for the soul",
     description: "Chicken in a clear ginger broth with green papaya and malunggay or chili leaves.",
-    category: "sabaw",
     region: "Luzon",
     image: tinola,
     servings: 4,
@@ -148,7 +127,6 @@ export const recipes: Recipe[] = [
     name: "Kare-Kare",
     tagline: "Rich peanut oxtail stew",
     description: "Oxtail and vegetables in a thick, savory peanut sauce, served with bagoong alamang.",
-    category: "ulam",
     region: "Pampanga",
     image: kareKare,
     servings: 6,
@@ -180,7 +158,6 @@ export const recipes: Recipe[] = [
     name: "Pinakbet",
     tagline: "Ilocano vegetable medley",
     description: "Squash, eggplant, okra, ampalaya and string beans stewed with shrimp paste.",
-    category: "gulay",
     region: "Ilocos",
     image: pinakbet,
     servings: 4,
@@ -212,7 +189,6 @@ export const recipes: Recipe[] = [
     name: "Pancit Canton",
     tagline: "Birthday noodles for long life",
     description: "Stir-fried egg noodles with shrimp, pork and colorful vegetables, finished with calamansi.",
-    category: "pancit",
     region: "Nationwide",
     image: pancit,
     servings: 6,
@@ -242,7 +218,6 @@ export const recipes: Recipe[] = [
     name: "Leche Flan",
     tagline: "Silky caramel custard",
     description: "A rich, smooth custard of egg yolks and milk under a layer of amber caramel.",
-    category: "panghimagas",
     region: "Nationwide",
     image: lecheFlan,
     servings: 8,
