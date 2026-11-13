@@ -10,7 +10,7 @@ const PARAM: Record<FilterKey, "category" | "ingredient" | "method" | "taste" | 
   categories: "category", ingredients: "ingredient", methods: "method", tastes: "taste", regions: "region", budgets: "budget",
 };
 
-type RecipeSearch = { q?: string; category?: string; ingredient?: string; method?: string; taste?: string; region?: string; budget?: string };
+type RecipeSearch = { q?: string | undefined; category?: string | undefined; ingredient?: string | undefined; method?: string | undefined; taste?: string | undefined; region?: string | undefined; budget?: string | undefined };
 
 const str = (v: unknown) => (typeof v === "string" && v.trim() ? v : undefined);
 

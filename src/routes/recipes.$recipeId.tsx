@@ -23,7 +23,7 @@ export const Route = createFileRoute("/recipes/$recipeId")({
   notFoundComponent: () => (
     <div className="py-24 text-center">
       <h1 className="text-3xl font-semibold">Recipe not found</h1>
-      <Link to="/recipes" search={{ q: "", category: undefined }} className="mt-4 inline-block font-bold text-primary">Back to Recipe Book</Link>
+      <Link to="/recipes" className="mt-4 inline-block font-bold text-primary">Back to Recipe Book</Link>
     </div>
   ),
   component: RecipeDetail,

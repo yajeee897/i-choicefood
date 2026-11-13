@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import { PageHeader } from "@/components/recipe-card";
-import { getCategories } from "@/lib/recipe-service";
+import { getFoodCategories as getCategories } from "@/lib/recipe-service";
 
 export const Route = createFileRoute("/my-recipes")({
   head: () => ({
@@ -20,7 +20,7 @@ interface Draft { id: number; name: string; category: string; notes: string }
 
 function MyRecipes() {
   const [drafts, setDrafts] = useState<Draft[]>([]);
-  const [form, setForm] = useState({ name: "", category: "ulam", notes: "" });
+  const [form, setForm] = useState({ name: "", category: "main-dishes", notes: "" });
   const field = "w-full rounded-xl border bg-background px-4 py-2.5 outline-none focus:ring-2 focus:ring-ring";
 
   return (
@@ -32,7 +32,7 @@ function MyRecipes() {
             e.preventDefault();
             if (!form.name.trim()) return;
             setDrafts((d) => [{ id: Date.now(), ...form }, ...d]);
-            setForm({ name: "", category: "ulam", notes: "" });
+            setForm({ name: "", category: "main-dishes", notes: "" });
           }}
           className="space-y-4 rounded-3xl bg-card p-6 shadow-soft"
         >

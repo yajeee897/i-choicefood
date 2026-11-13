@@ -2,9 +2,9 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Search, Calculator, BookOpen, Flame, ArrowRight } from "lucide-react";
 import hero from "@/assets/hero.jpg";
-import { RecipeCard } from "@/components/recipe-card";
+import { FoodCard } from "@/components/food-card";
 import { CategoryCard } from "@/components/category-card";
-import { getCategories, getFeatured, getPopular } from "@/lib/recipe-service";
+import { getCategoryCovers, getFeaturedFoods, getFoodCategories, getPopularFoods } from "@/lib/recipe-service";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -37,8 +37,9 @@ function SectionTitle({ eyebrow, title, to }: { eyebrow: string; title: string; 
 function Index() {
   const [q, setQ] = useState("");
   const navigate = useNavigate();
-  const featured = getFeatured();
-  const popular = getPopular(4);
+  const featured = getFeaturedFoods().slice(0, 4);
+  const popular = getPopularFoods(4, featured.map((f) => f.id));
+  const covers = getCategoryCovers();
 
   return (
     <div>
@@ -55,7 +56,7 @@ function Index() {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                navigate({ to: "/recipes", search: { q, category: undefined } });
+                navigate({ to: "/recipes", search: q.trim() ? { q: q.trim() } : {} });
               }}
               className="mt-8 flex items-center gap-2 rounded-full bg-card p-2 shadow-lift"
             >
@@ -78,21 +79,21 @@ function Index() {
       <section className="mx-auto max-w-7xl px-4 pt-16 sm:px-6">
         <SectionTitle eyebrow="Featured" title="Filipino dishes to try" to="/recipes" />
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {featured.map((r) => <RecipeCard key={r.id} recipe={r} />)}
+          {featured.map((f) => <FoodCard key={f.id} food={f} />)}
         </div>
       </section>
 
       <section className="mx-auto max-w-7xl px-4 pt-16 sm:px-6">
         <SectionTitle eyebrow="Browse" title="Food categories" to="/categories" />
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
-          {getCategories().map((c) => <CategoryCard key={c.id} category={c} />)}
+        <div className="-mx-4 flex snap-x gap-4 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:px-6">
+          {getFoodCategories().map((c) => <div key={c.id} className="w-40 shrink-0 snap-start sm:w-52"><CategoryCard category={c} cover={covers[c.id]} /></div>)}
         </div>
       </section>
 
       <section className="mx-auto max-w-7xl px-4 pt-16 sm:px-6">
         <SectionTitle eyebrow="Trending" title="Popular recipes" />
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {popular.map((r) => <RecipeCard key={r.id} recipe={r} />)}
+          {popular.map((f) => <FoodCard key={f.id} food={f} />)}
         </div>
       </section>
 

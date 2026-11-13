@@ -34,9 +34,9 @@ export const pesoWhole = (n: number) =>
 // ── Food database ───────────────────────────────────────────────────────
 export type Food = FoodRecord & {
   /** Photo URL, or undefined when no matching photo exists (UI shows a placeholder) */
-  image?: string;
+  image?: string | undefined;
   /** Wikimedia Commons file name for the photo credit */
-  imageFile?: string;
+  imageFile?: string | undefined;
   budget: BudgetId;
   hasFullRecipe: boolean;
 };
