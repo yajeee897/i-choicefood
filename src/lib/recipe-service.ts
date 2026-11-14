@@ -3,6 +3,7 @@
 import { recipes, type Ingredient, type Recipe } from "@/data/recipes";
 import { foods, type FoodRecord } from "@/data/foods";
 import { FOOD_PHOTOS } from "@/data/food-photos";
+import { RECIPE_STEP_VISUALS, STEP_KEYWORDS, STEP_PHOTOS, type StepVisual } from "@/data/step-visuals";
 import {
   BUDGETS, COOKING_METHODS, FOOD_CATEGORIES, MAIN_INGREDIENTS, REGIONS, TASTES,
   budgetFor, type BudgetId, type CategoryId,
@@ -162,5 +163,45 @@ export function filterFoods(filters: FoodFilters): Food[] {
     if (!anyOf(filters.budgets, [f.budget])) return false;
     const text = searchIndex.get(f.id) ?? "";
     return words.every((w) => text.includes(w));
+  });
+}
+
+// ── Cooking Simulator steps ─────────────────────────────────────────────
+export interface CookingStep {
+  text: string;
+  stage: string;
+  /** Photo of this step's cooking action */
+  image: string;
+  /** Wait time mentioned in the step, in minutes (undefined when none) */
+  minutes: number | undefined;
+}
+
+/** Reads the first wait time in a step, e.g. "Simmer for 35–40 minutes" → 35, "2–2½ hours" → 120. */
+export function stepMinutes(text: string): number | undefined {
+  const m = text.match(/(\d+(?:\.\d+)?)(?:\s*[–-]\s*[\d½.]+)?\s*(minutes?|mins?|hours?|hrs?)\b/i);
+  if (!m) return undefined;
+  const n = Number(m[1]);
+  return /^h/i.test(m[2]!) ? n * 60 : n;
+}
+
+/**
+ * Every step gets its own photo: the hand-picked one for that step, else the
+ * first unused keyword match, else the dish photo as a last resort.
+ */
+export function getCookingSteps(recipe: Recipe): CookingStep[] {
+  const picked = RECIPE_STEP_VISUALS[recipe.id] ?? [];
+  const used = new Set<string>();
+  return recipe.steps.map((text, i) => {
+    let visual: StepVisual | undefined = picked[i];
+    if (!visual || used.has(visual.photo)) {
+      visual = STEP_KEYWORDS.find((k) => k.pattern.test(text) && !used.has(k.visual.photo))?.visual;
+    }
+    if (visual) used.add(visual.photo);
+    return {
+      text,
+      stage: visual?.stage ?? `Step ${i + 1}`,
+      image: visual ? STEP_PHOTOS[visual.photo] : recipe.image,
+      minutes: stepMinutes(text),
+    };
   });
 }
