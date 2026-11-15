@@ -126,7 +126,7 @@ function Simulator() {
               src={done ? recipe.image : current.image}
               name={done ? recipe.name : `${recipe.name} — ${current.stage}`}
               eager
-              className="fade-up absolute inset-0 h-full w-full"
+              className="fade-in absolute inset-0 h-full w-full"
             />
             {!done && (
               <span className="absolute bottom-3 left-3 rounded-full bg-card/90 px-3 py-1 text-xs font-bold text-foreground shadow-soft">

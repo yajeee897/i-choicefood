@@ -125,7 +125,7 @@ function KeyIngredients({ food }: { food: Food }) {
       <div className="rounded-3xl bg-card p-6 shadow-soft lg:col-span-2">
         <h2 className="text-2xl font-semibold">Key ingredients</h2>
         <ul className="mt-4 divide-y">
-          {food.ingredients.map((i) => <li key={i} className="py-2.5 text-sm capitalize">{i}</li>)}
+          {food.ingredients.map((i) => <li key={i} className="py-2.5 text-sm first-letter:uppercase">{i}</li>)}
         </ul>
       </div>
       <div className="rounded-3xl border border-dashed p-6 lg:col-span-3">

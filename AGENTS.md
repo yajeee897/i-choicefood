@@ -32,3 +32,5 @@ use the editor.
 ## Architecture
 - UI reads recipe data only through `src/lib/recipe-service.ts`; swap its internals for database calls later without touching components.
 - Favorites and My Recipes drafts are session-only React state (no fake persistence) until a backend phase.
+- Cooking Simulator step photos are assigned per recipe step in `src/data/step-visuals.ts`, with a keyword fallback in `getCookingSteps`; every step in a recipe must resolve to a distinct photo (enforced by tests).
+- Every food record has a details page at `/recipes/$id`; recipes with full ingredients/steps share the food id so the page shows the full recipe when one exists.
