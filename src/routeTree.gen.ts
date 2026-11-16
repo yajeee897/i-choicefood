@@ -10,17 +10,34 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as CookingSimulatorRouteImport } from './routes/cooking-simulator'
 import { Route as CostCalculatorRouteImport } from './routes/cost-calculator'
 import { Route as FavoritesRouteImport } from './routes/favorites'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as MyRecipesRouteImport } from './routes/my-recipes'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as AuthenticatedAccountRouteImport } from './routes/_authenticated/account'
+import { Route as AuthenticatedCookingHistoryRouteImport } from './routes/_authenticated/cooking-history'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as RecipesIndexRouteImport } from './routes/recipes.index'
 import { Route as RecipesRecipeIdRouteImport } from './routes/recipes.$recipeId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CategoriesRoute = CategoriesRouteImport.update({
@@ -43,10 +60,41 @@ const FavoritesRoute = FavoritesRouteImport.update({
   path: '/favorites',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MyRecipesRoute = MyRecipesRouteImport.update({
   id: '/my-recipes',
   path: '/my-recipes',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAccountRoute = AuthenticatedAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCookingHistoryRoute =
+  AuthenticatedCookingHistoryRouteImport.update({
+    id: '/cooking-history',
+    path: '/cooking-history',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/callback',
+  path: '/callback',
+  getParentRoute: () => AuthRoute,
 } as any)
 const RecipesIndexRoute = RecipesIndexRouteImport.update({
   id: '/recipes/',
@@ -61,32 +109,54 @@ const RecipesRecipeIdRoute = RecipesRecipeIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteWithChildren
   '/categories': typeof CategoriesRoute
   '/cooking-simulator': typeof CookingSimulatorRoute
   '/cost-calculator': typeof CostCalculatorRoute
   '/favorites': typeof FavoritesRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/my-recipes': typeof MyRecipesRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/signup': typeof SignupRoute
+  '/account': typeof AuthenticatedAccountRoute
+  '/cooking-history': typeof AuthenticatedCookingHistoryRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/recipes/$recipeId': typeof RecipesRecipeIdRoute
   '/recipes/': typeof RecipesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteWithChildren
   '/categories': typeof CategoriesRoute
   '/cooking-simulator': typeof CookingSimulatorRoute
   '/cost-calculator': typeof CostCalculatorRoute
   '/favorites': typeof FavoritesRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/my-recipes': typeof MyRecipesRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/signup': typeof SignupRoute
+  '/account': typeof AuthenticatedAccountRoute
+  '/cooking-history': typeof AuthenticatedCookingHistoryRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/recipes/$recipeId': typeof RecipesRecipeIdRoute
   '/recipes': typeof RecipesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRouteWithChildren
   '/categories': typeof CategoriesRoute
   '/cooking-simulator': typeof CookingSimulatorRoute
   '/cost-calculator': typeof CostCalculatorRoute
   '/favorites': typeof FavoritesRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/my-recipes': typeof MyRecipesRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/signup': typeof SignupRoute
+  '/_authenticated/account': typeof AuthenticatedAccountRoute
+  '/_authenticated/cooking-history': typeof AuthenticatedCookingHistoryRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/recipes/$recipeId': typeof RecipesRecipeIdRoute
   '/recipes/': typeof RecipesIndexRoute
 }
@@ -94,42 +164,69 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
     | '/categories'
     | '/cooking-simulator'
     | '/cost-calculator'
     | '/favorites'
+    | '/forgot-password'
     | '/my-recipes'
+    | '/reset-password'
+    | '/signup'
+    | '/account'
+    | '/cooking-history'
+    | '/auth/callback'
     | '/recipes/$recipeId'
     | '/recipes/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/categories'
     | '/cooking-simulator'
     | '/cost-calculator'
     | '/favorites'
+    | '/forgot-password'
     | '/my-recipes'
+    | '/reset-password'
+    | '/signup'
+    | '/account'
+    | '/cooking-history'
+    | '/auth/callback'
     | '/recipes/$recipeId'
     | '/recipes'
   id:
     | '__root__'
     | '/'
+    | '/_authenticated'
+    | '/auth'
     | '/categories'
     | '/cooking-simulator'
     | '/cost-calculator'
     | '/favorites'
+    | '/forgot-password'
     | '/my-recipes'
+    | '/reset-password'
+    | '/signup'
+    | '/_authenticated/account'
+    | '/_authenticated/cooking-history'
+    | '/auth/callback'
     | '/recipes/$recipeId'
     | '/recipes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRouteWithChildren
   CategoriesRoute: typeof CategoriesRoute
   CookingSimulatorRoute: typeof CookingSimulatorRoute
   CostCalculatorRoute: typeof CostCalculatorRoute
   FavoritesRoute: typeof FavoritesRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   MyRecipesRoute: typeof MyRecipesRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
+  SignupRoute: typeof SignupRoute
   RecipesRecipeIdRoute: typeof RecipesRecipeIdRoute
   RecipesIndexRoute: typeof RecipesIndexRoute
 }
@@ -141,6 +238,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/categories': {
@@ -171,12 +282,54 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof FavoritesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/my-recipes': {
       id: '/my-recipes'
       path: '/my-recipes'
       fullPath: '/my-recipes'
       preLoaderRoute: typeof MyRecipesRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/account': {
+      id: '/_authenticated/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AuthenticatedAccountRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/cooking-history': {
+      id: '/_authenticated/cooking-history'
+      path: '/cooking-history'
+      fullPath: '/cooking-history'
+      preLoaderRoute: typeof AuthenticatedCookingHistoryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof AuthRoute
     }
     '/recipes/': {
       id: '/recipes/'
@@ -195,13 +348,41 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAccountRoute: typeof AuthenticatedAccountRoute
+  AuthenticatedCookingHistoryRoute: typeof AuthenticatedCookingHistoryRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAccountRoute: AuthenticatedAccountRoute,
+  AuthenticatedCookingHistoryRoute: AuthenticatedCookingHistoryRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
+interface AuthRouteChildren {
+  AuthCallbackRoute: typeof AuthCallbackRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthCallbackRoute: AuthCallbackRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRouteWithChildren,
   CategoriesRoute: CategoriesRoute,
   CookingSimulatorRoute: CookingSimulatorRoute,
   CostCalculatorRoute: CostCalculatorRoute,
   FavoritesRoute: FavoritesRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   MyRecipesRoute: MyRecipesRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
+  SignupRoute: SignupRoute,
   RecipesRecipeIdRoute: RecipesRecipeIdRoute,
   RecipesIndexRoute: RecipesIndexRoute,
 }

@@ -13,7 +13,9 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { FavoritesProvider } from "@/lib/favorites";
+import { AuthProvider } from "@/lib/auth";
 import { SiteHeader, SiteFooter } from "@/components/site-header";
+import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -129,15 +131,18 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <FavoritesProvider>
-        <div className="flex min-h-screen flex-col">
-          <SiteHeader />
-          <main className="flex-1">
-            <Outlet />
-          </main>
-          <SiteFooter />
-        </div>
-      </FavoritesProvider>
+      <AuthProvider>
+        <FavoritesProvider>
+          <div className="flex min-h-screen flex-col">
+            <SiteHeader />
+            <main className="flex-1">
+              <Outlet />
+            </main>
+            <SiteFooter />
+          </div>
+          <Toaster />
+        </FavoritesProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

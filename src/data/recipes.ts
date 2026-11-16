@@ -29,6 +29,7 @@ export interface Recipe {
   popularity: number;
   ingredients: Ingredient[];
   steps: string[];
+  notes?: string[];
 }
 
 export const recipes: Recipe[] = [
@@ -51,16 +52,24 @@ export const recipes: Recipe[] = [
       { name: "Soy sauce", quantity: 0.5, unit: "cup", pricePerUnit: 20 },
       { name: "Cane vinegar", quantity: 0.33, unit: "cup", pricePerUnit: 15 },
       { name: "Garlic", quantity: 1, unit: "head", pricePerUnit: 12 },
+      { name: "Onion", quantity: 1, unit: "pc", pricePerUnit: 10 },
       { name: "Bay leaves", quantity: 3, unit: "pc", pricePerUnit: 1 },
-      { name: "Whole peppercorns", quantity: 1, unit: "tsp", pricePerUnit: 3 },
+      { name: "Black peppercorns", quantity: 1, unit: "tsp", pricePerUnit: 3 },
+      { name: "Water", quantity: 1, unit: "cup", pricePerUnit: 0 },
+      { name: "Brown or white sugar", quantity: 1, unit: "tbsp", pricePerUnit: 2 },
     ],
     steps: [
-      "Combine chicken, pork, soy sauce and crushed garlic. Marinate for at least 30 minutes.",
-      "Heat a pot and sear the meat until lightly browned.",
-      "Pour in the marinade, vinegar, bay leaves and peppercorns. Do not stir until it boils.",
-      "Simmer covered for 35–40 minutes until the meat is tender.",
-      "Uncover and reduce the sauce until glossy. Serve with steamed rice.",
+      "Prepare and clean the chicken and pork, then cut into similar-sized pieces.",
+      "Combine chicken, pork, soy sauce, vinegar, garlic, onion, bay leaves and black pepper.",
+      "Allow the meat to absorb the marinade for at least 30 minutes.",
+      "Cook the chicken and pork, adding water as needed.",
+      "Simmer until the chicken is thoroughly cooked and the meat is tender, about 30 minutes for a standard batch.",
+      "Add brown sugar or white sugar according to taste.",
+      "Adjust the flavor with a little soy sauce or vinegar if necessary.",
+      "Continue simmering until the sauce reaches your desired consistency.",
+      "Serve with steamed rice.",
     ],
+    notes: ["Sugar helps balance the salty soy sauce and sour vinegar in Chicken Adobo. Add it gradually and adjust to taste."],
   },
   {
     id: "sinigang",
