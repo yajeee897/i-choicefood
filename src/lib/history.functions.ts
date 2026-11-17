@@ -3,7 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Tables } from "@/integrations/supabase/types";
 
-export type CookingHistoryRecord = Tables<"cooking_history">["Row"];
+export type CookingHistoryRecord = Tables<"cooking_history">;
 
 export const getCookingHistory = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
