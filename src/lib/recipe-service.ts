@@ -194,7 +194,16 @@ export function getCookingSteps(recipe: Recipe): CookingStep[] {
   return recipe.steps.map((text, i) => {
     let visual: StepVisual | undefined = picked[i];
     if (!visual || used.has(visual.photo)) {
-      visual = STEP_KEYWORDS.find((k) => k.pattern.test(text) && !used.has(k.visual.photo))?.visual;
+      const keyword = STEP_KEYWORDS.find(
+  (k) => k.match.test(text) && !used.has(k.photo)
+);
+
+if (keyword) {
+  visual = {
+    photo: keyword.photo,
+    stage: keyword.stage,
+  };
+}
     }
     if (visual) used.add(visual.photo);
     return {

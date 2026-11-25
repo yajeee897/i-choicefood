@@ -1,3 +1,8 @@
+import {
+  FOOD_CATEGORIES,
+  type CategoryId,
+  type BudgetId,
+} from "@/data/food-filters";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ChevronDown, Search, SlidersHorizontal, X } from "lucide-react";
@@ -51,7 +56,27 @@ export const Route = createFileRoute("/recipes/")({
 function parseList(val: string | undefined): string[] {
   if (!val) return [];
   return val.split(",").map((s) => s.trim()).filter(Boolean);
+}function parseCategoryList(val: string | undefined): CategoryId[] {
+  const allowed = new Set(FOOD_CATEGORIES.map((category) => category.id));
+
+  return parseList(val).filter(
+    (value): value is CategoryId => allowed.has(value as CategoryId)
+  );
 }
+function parseBudgetList(val: string | undefined): BudgetId[] {
+  const allowed: BudgetId[] = [
+    "budget",
+    "affordable",
+    "moderate",
+    "premium",
+  ];
+
+  return parseList(val).filter(
+    (value): value is BudgetId =>
+      allowed.includes(value as BudgetId)
+  );
+}
+
 
 function RecipesPage() {
   const search = Route.useSearch();
@@ -60,13 +85,14 @@ function RecipesPage() {
 
   const q = search.q ?? "";
   const filters: FoodFilters = {
-    categories: parseList(search.category),
-    ingredients: parseList(search.ingredient),
-    methods: parseList(search.method),
-    tastes: parseList(search.taste),
-    regions: parseList(search.region),
-    budgets: parseList(search.budget),
-  };
+  q,
+  categories: parseCategoryList(search.category),
+  ingredients: parseList(search.ingredient),
+  methods: parseList(search.method),
+  tastes: parseList(search.taste),
+  regions: parseList(search.region),
+  budgets: parseBudgetList(search.budget)
+};
 
   const setGroup = (key: FilterKey, values: string[]) => {
     navigate({
@@ -82,7 +108,7 @@ function RecipesPage() {
   const clearAll = () => navigate({ search: {}, replace: true, resetScroll: false });
 
   const activeFilterCount = Object.values(filters).reduce((acc, arr) => acc + arr.length, 0);
-  const matchingFoods = filterFoods(filters, q);
+  const matchingFoods = filterFoods(filters);
   const totalCount = getFoods().length;
 
   return (
@@ -184,7 +210,7 @@ function RecipesPage() {
               {FILTER_GROUPS.map((g) => (
                 <FilterAccordion
                   key={g.key}
-                  title={g.title}
+                  title={g.label}
                   options={g.options}
                   selected={filters[g.key] ?? []}
                   onChange={(next) => setGroup(g.key, next)}
@@ -207,7 +233,7 @@ function RecipesPage() {
                 {FILTER_GROUPS.map((g) => (
                   <FilterAccordion
                     key={g.key}
-                    title={g.title}
+                    title={g.label}
                     options={g.options}
                     selected={filters[g.key] ?? []}
                     onChange={(next) => setGroup(g.key, next)}
@@ -262,6 +288,7 @@ function RecipesPage() {
   );
 }
 
+
 function FilterAccordion({
   title,
   options,
@@ -269,17 +296,17 @@ function FilterAccordion({
   onChange,
 }: {
   title: string;
-  options: readonly string[];
+  options: readonly { value: string; label: string }[];
   selected: string[];
   onChange: (next: string[]) => void;
 }) {
   const [open, setOpen] = useState(true);
 
-  const toggle = (opt: string) => {
-    if (selected.includes(opt)) {
-      onChange(selected.filter((x) => x !== opt));
+  const toggle = (value: string) => {
+    if (selected.includes(value)) {
+      onChange(selected.filter((x) => x !== value));
     } else {
-      onChange([...selected, opt]);
+      onChange([...selected, value]);
     }
   };
 
@@ -291,24 +318,36 @@ function FilterAccordion({
       >
         <span>
           {title}
-          {selected.length > 0 && <span className="ml-1 text-xs text-primary">({selected.length})</span>}
+          {selected.length > 0 && (
+            <span className="ml-1 text-xs text-primary">
+              ({selected.length})
+            </span>
+          )}
         </span>
-        <ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} />
+        <ChevronDown
+          className={`h-4 w-4 transition-transform ${
+            open ? "rotate-180" : ""
+          }`}
+        />
       </button>
 
       {open && (
         <div className="mt-2 space-y-1.5 pl-1 max-h-48 overflow-y-auto">
           {options.map((opt) => {
-            const checked = selected.includes(opt);
+            const checked = selected.includes(opt.value);
+
             return (
-              <label key={opt} className="flex cursor-pointer items-center gap-2 text-xs text-foreground/85 hover:text-foreground">
+              <label
+                key={opt.value}
+                className="flex cursor-pointer items-center gap-2 text-xs text-foreground/85 hover:text-foreground"
+              >
                 <input
                   type="checkbox"
                   checked={checked}
-                  onChange={() => toggle(opt)}
+                  onChange={() => toggle(opt.value)}
                   className="rounded border-input text-primary focus:ring-primary/40"
                 />
-                <span>{opt}</span>
+                <span>{opt.label}</span>
               </label>
             );
           })}
