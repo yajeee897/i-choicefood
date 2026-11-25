@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Menu, X, ChefHat } from "lucide-react";
+import { Menu, X, ChefHat, History, UserCheck, LogIn } from "lucide-react";
+import { useAuth } from "@/lib/auth";
 
 export const navItems = [
   { to: "/", label: "Home" },
@@ -27,9 +28,12 @@ export function Logo() {
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const { user, displayName, loading } = useAuth();
+
   const linkCls =
     "rounded-full px-3 py-2 text-sm font-semibold text-foreground/80 transition-colors hover:bg-muted hover:text-foreground";
   const activeCls = "bg-secondary text-secondary-foreground hover:bg-secondary hover:text-secondary-foreground";
+
   return (
     <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
@@ -41,6 +45,36 @@ export function SiteHeader() {
             </Link>
           ))}
         </nav>
+
+        {/* User Auth controls */}
+        <div className="hidden items-center gap-2 xl:flex">
+          {loading ? (
+            <div className="h-9 w-20 animate-pulse rounded-full bg-muted" />
+          ) : user ? (
+            <div className="flex items-center gap-2">
+              <Link
+                to="/cooking-history"
+                className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-xs font-bold text-foreground transition-colors hover:bg-secondary hover:text-secondary-foreground"
+              >
+                <History className="h-3.5 w-3.5" /> History
+              </Link>
+              <Link
+                to="/account"
+                className="flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-1.5 text-xs font-bold text-primary-foreground transition-opacity hover:opacity-90"
+              >
+                <UserCheck className="h-3.5 w-3.5" /> {displayName}
+              </Link>
+            </div>
+          ) : (
+            <Link
+              to="/auth"
+              className="flex items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-xs font-bold text-primary-foreground transition-opacity hover:opacity-90"
+            >
+              <LogIn className="h-3.5 w-3.5" /> Sign In
+            </Link>
+          )}
+        </div>
+
         <button
           className="rounded-full p-2 hover:bg-muted xl:hidden"
           aria-label={open ? "Close menu" : "Open menu"}
@@ -49,6 +83,7 @@ export function SiteHeader() {
           {open ? <X /> : <Menu />}
         </button>
       </div>
+
       {open && (
         <nav className="fade-up grid gap-1 border-t px-4 py-3 xl:hidden">
           {navItems.map((n) => (
@@ -63,6 +98,34 @@ export function SiteHeader() {
               {n.label}
             </Link>
           ))}
+          <div className="mt-2 border-t pt-2">
+            {user ? (
+              <div className="grid gap-1">
+                <Link
+                  to="/cooking-history"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold hover:bg-muted"
+                >
+                  <History className="h-4 w-4" /> Cooking History
+                </Link>
+                <Link
+                  to="/account"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold hover:bg-muted"
+                >
+                  <UserCheck className="h-4 w-4" /> Account ({displayName})
+                </Link>
+              </div>
+            ) : (
+              <Link
+                to="/auth"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground"
+              >
+                <LogIn className="h-4 w-4" /> Sign In / Sign Up
+              </Link>
+            )}
+          </div>
         </nav>
       )}
     </header>

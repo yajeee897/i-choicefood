@@ -88,7 +88,8 @@ function CookingHistoryPage() {
                 {history.slice(0, 3).map((record) => (
                   <article key={record.id} className="overflow-hidden rounded-3xl bg-card shadow-soft">
                     <div className="aspect-[16/9]"><FoodImage src={record.recipe_image} name={record.recipe_name} className="h-full w-full" /></div>
-                    <div className="p-5"><p className="text-xs font-bold uppercase tracking-wide text-secondary">{record.status}</p><h3 className="mt-1 text-xl font-semibold">{record.recipe_name}</h3><p className="mt-2 text-sm text-muted-foreground">{dateLabel(record.cooked_at)} · {timeLabel(record.cooked_at)}</p><p className="mt-1 text-sm text-muted-foreground">{record.servings} servings · {cookingTimeLabel(record)} estimated</p><div className="mt-4 flex gap-2"><Link to="/recipes/$recipeId" params={{ recipeId: record.recipe_id }} className="rounded-full bg-muted px-4 py-2 text-xs font-bold">View recipe</Link><Link to="/cooking-simulator" search={{ recipe: record.recipe_id }} className="rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground">Cook again</Link></div></div>
+                    <div className="p-5"><p className="text-xs font-bold uppercase tracking-wide text-secondary">{record.status}</p><h3 className="mt-1 text-xl font-semibold">{record.recipe_name}</h3><p className="mt-2 text-sm text-muted-foreground">{dateLabel(record.cooked_at)} · {timeLabel(record.cooked_at)}</p><p className="mt-1 text-sm text-muted-foreground">{record.servings} servings · {cookingTimeLabel({ minMinutes: record.estimated_min_minutes, maxMinutes: record.estimated_max_minutes })}
+</p><div className="mt-4 flex gap-2"><Link to="/recipes/$recipeId" params={{ recipeId: record.recipe_id }} className="rounded-full bg-muted px-4 py-2 text-xs font-bold">View recipe</Link><Link to="/cooking-simulator" search={{ recipe: record.recipe_id }} className="rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground">Cook again</Link></div></div>
                   </article>
                 ))}
               </div>
@@ -101,7 +102,8 @@ function CookingHistoryPage() {
                   {history.map((record) => (
                     <li key={record.id} className="flex flex-wrap items-center gap-4 py-4">
                       <div className="h-16 w-20 shrink-0 overflow-hidden rounded-xl"><FoodImage src={record.recipe_image} name={record.recipe_name} className="h-full w-full" /></div>
-                      <div className="min-w-0 flex-1"><Link to="/recipes/$recipeId" params={{ recipeId: record.recipe_id }} className="font-bold hover:text-primary">{record.recipe_name}</Link><p className="mt-1 text-xs text-muted-foreground">{dateLabel(record.cooked_at)} at {timeLabel(record.cooked_at)} · {record.status}</p><p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground"><Clock className="h-3 w-3" />{record.servings} servings · {cookingTimeLabel(record)} estimated</p></div>
+                      <div className="min-w-0 flex-1"><Link to="/recipes/$recipeId" params={{ recipeId: record.recipe_id }} className="font-bold hover:text-primary">{record.recipe_name}</Link><p className="mt-1 text-xs text-muted-foreground">{dateLabel(record.cooked_at)} at {timeLabel(record.cooked_at)} · {record.status}</p><p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground"><Clock className="h-3 w-3" />{record.servings} servings · {cookingTimeLabel({ minMinutes: record.estimated_min_minutes, maxMinutes: record.estimated_max_minutes })}
+</p></div>
                       <Link to="/cooking-simulator" search={{ recipe: record.recipe_id }} className="rounded-full bg-muted px-4 py-2 text-xs font-bold">Cook again</Link>
                     </li>
                   ))}

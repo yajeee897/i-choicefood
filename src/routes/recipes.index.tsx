@@ -5,12 +5,24 @@ import { PageHeader } from "@/components/recipe-card";
 import { FoodCard } from "@/components/food-card";
 import { FILTER_GROUPS, filterFoods, getFoods, type FilterKey, type FoodFilters } from "@/lib/recipe-service";
 
-// Each filter is stored in the address bar as a comma-separated list, e.g. ?ingredient=Pork,Chicken
 const PARAM: Record<FilterKey, "category" | "ingredient" | "method" | "taste" | "region" | "budget"> = {
-  categories: "category", ingredients: "ingredient", methods: "method", tastes: "taste", regions: "region", budgets: "budget",
+  categories: "category",
+  ingredients: "ingredient",
+  methods: "method",
+  tastes: "taste",
+  regions: "region",
+  budgets: "budget",
 };
 
-type RecipeSearch = { q?: string | undefined; category?: string | undefined; ingredient?: string | undefined; method?: string | undefined; taste?: string | undefined; region?: string | undefined; budget?: string | undefined };
+type RecipeSearch = {
+  q?: string | undefined;
+  category?: string | undefined;
+  ingredient?: string | undefined;
+  method?: string | undefined;
+  taste?: string | undefined;
+  region?: string | undefined;
+  budget?: string | undefined;
+};
 
 const str = (v: unknown) => (typeof v === "string" && v.trim() ? v : undefined);
 
@@ -33,192 +45,275 @@ export const Route = createFileRoute("/recipes/")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: RecipeBook,
+  component: RecipesPage,
 });
 
-function parseFilters(search: RecipeSearch): FoodFilters {
-  const pick = (key: FilterKey) => {
-    const allowed = FILTER_GROUPS.find((g) => g.key === key)!.options.map((o) => o.value as string);
-    const raw = search[PARAM[key]];
-    return raw ? raw.split(",").map((v) => v.trim()).filter((v) => allowed.includes(v)) : [];
-  };
-  return {
-    q: search.q ?? "",
-    categories: pick("categories") as FoodFilters["categories"],
-    ingredients: pick("ingredients"),
-    methods: pick("methods"),
-    tastes: pick("tastes"),
-    regions: pick("regions"),
-    budgets: pick("budgets") as FoodFilters["budgets"],
-  };
+function parseList(val: string | undefined): string[] {
+  if (!val) return [];
+  return val.split(",").map((s) => s.trim()).filter(Boolean);
 }
 
-function RecipeBook() {
+function RecipesPage() {
   const search = Route.useSearch();
-  const navigate = useNavigate({ from: "/recipes/" });
-  const filters = parseFilters(search);
-  const results = filterFoods(filters);
-  const total = getFoods().length;
-  const [panelOpen, setPanelOpen] = useState(false);
+  const navigate = useNavigate({ from: Route.fullPath });
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
-  const active = FILTER_GROUPS.flatMap((g) =>
-    (filters[g.key] as string[]).map((value) => ({
-      key: g.key, value, label: g.options.find((o) => o.value === value)?.label ?? value,
-    })),
-  );
-  const activeCount = active.length;
-
-  const setGroup = (key: FilterKey, values: string[]) =>
-    navigate({ search: (p) => ({ ...p, [PARAM[key]]: values.length ? values.join(",") : undefined }), replace: true, resetScroll: false });
-  const toggle = (key: FilterKey, value: string) => {
-    const cur = filters[key] as string[];
-    setGroup(key, cur.includes(value) ? cur.filter((v) => v !== value) : [...cur, value]);
+  const q = search.q ?? "";
+  const filters: FoodFilters = {
+    categories: parseList(search.category),
+    ingredients: parseList(search.ingredient),
+    methods: parseList(search.method),
+    tastes: parseList(search.taste),
+    regions: parseList(search.region),
+    budgets: parseList(search.budget),
   };
+
+  const setGroup = (key: FilterKey, values: string[]) => {
+    navigate({
+      search: (p) => ({
+        ...p,
+        [PARAM[key]]: values.length ? values.join(",") : undefined,
+      }),
+      replace: true,
+      resetScroll: false,
+    });
+  };
+
   const clearAll = () => navigate({ search: {}, replace: true, resetScroll: false });
 
-  const panel = (
-    <div className="space-y-2">
-      {FILTER_GROUPS.map((g) => (
-        <FilterGroup
-          key={g.key}
-          label={g.label}
-          selected={filters[g.key] as string[]}
-          options={g.options as readonly { value: string; label: string }[]}
-          defaultOpen={g.key === "categories" || g.key === "ingredients" || g.key === "budgets"}
-          onToggle={(v) => toggle(g.key, v)}
-        />
-      ))}
-    </div>
-  );
+  const activeFilterCount = Object.values(filters).reduce((acc, arr) => acc + arr.length, 0);
+  const matchingFoods = filterFoods(filters, q);
+  const totalCount = getFoods().length;
 
   return (
-    <div>
-      <PageHeader title="Recipe Book" subtitle="Explore Filipino dishes from every region. Search, then combine filters to find exactly what you crave." />
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="flex items-center gap-2 rounded-full bg-card px-4 py-3 shadow-soft">
-          <Search className="h-5 w-5 shrink-0 text-muted-foreground" />
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <PageHeader
+        title="Filipino Recipe Book"
+        subtitle={`Explore our complete collection of ${totalCount} authentic Filipino dishes, soups, regional specialties, and treats.`}
+      />
+
+      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="relative flex-1">
+          <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
           <input
-            value={filters.q}
-            onChange={(e) => navigate({ search: (p) => ({ ...p, q: e.target.value || undefined }), replace: true, resetScroll: false })}
-            placeholder="Search dish, ingredient, category, region or taste…"
-            aria-label="Search dishes"
-            className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
+            type="search"
+            value={q}
+            onChange={(e) =>
+              navigate({
+                search: (p) => ({ ...p, q: e.target.value || undefined }),
+                replace: true,
+                resetScroll: false,
+              })
+            }
+            placeholder="Search by dish name, ingredient, region, taste, or cooking style…"
+            className="w-full rounded-full border bg-card py-3.5 pl-12 pr-10 text-sm shadow-soft focus:outline-none focus:ring-2 focus:ring-primary/40"
           />
-          {filters.q && (
-            <button aria-label="Clear search" onClick={() => navigate({ search: (p) => ({ ...p, q: undefined }), replace: true, resetScroll: false })} className="rounded-full p-1 hover:bg-muted">
-              <X className="h-4 w-4" />
+          {q && (
+            <button
+              aria-label="Clear search"
+              onClick={() => navigate({ search: (p) => ({ ...p, q: undefined }), replace: true, resetScroll: false })}
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 hover:bg-muted"
+            >
+              <X className="h-4 w-4 text-muted-foreground" />
             </button>
           )}
         </div>
 
-        <div className="mt-6 lg:grid lg:grid-cols-[17rem_1fr] lg:gap-8">
-          <aside className="hidden lg:block" aria-label="Filters">
-            <div className="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pb-6 pr-1">
-              <div className="mb-3 flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Filters</h2>
-                {activeCount > 0 && <button onClick={clearAll} className="text-sm font-bold text-primary hover:underline">Clear all</button>}
-              </div>
-              {panel}
-            </div>
-          </aside>
+        <button
+          onClick={() => setMobileFilterOpen((o) => !o)}
+          className="inline-flex items-center justify-center gap-2 rounded-full border bg-card px-5 py-3 text-sm font-semibold shadow-soft hover:bg-muted lg:hidden"
+        >
+          <SlidersHorizontal className="h-4 w-4" />
+          Filters
+          {activeFilterCount > 0 && (
+            <span className="grid h-5 w-5 place-items-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+              {activeFilterCount}
+            </span>
+          )}
+        </button>
+      </div>
 
-          <div>
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="text-sm text-muted-foreground" aria-live="polite">
-                Showing <b className="text-foreground">{results.length}</b> of {total} dishes
+      {(activeFilterCount > 0 || q) && (
+        <div className="mt-4 flex flex-wrap items-center gap-2 rounded-2xl bg-card/60 p-3 text-sm">
+          <span className="font-semibold text-muted-foreground">Active filters:</span>
+          {q && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+              "{q}"
+              <button onClick={() => navigate({ search: (p) => ({ ...p, q: undefined }), replace: true })} aria-label="Remove search">
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          )}
+          {FILTER_GROUPS.flatMap((g) =>
+            (filters[g.key] ?? []).map((val) => (
+              <span
+                key={`${g.key}-${val}`}
+                className="inline-flex items-center gap-1 rounded-full bg-secondary/15 px-3 py-1 text-xs font-semibold text-secondary"
+              >
+                {val}
+                <button
+                  onClick={() => setGroup(g.key, (filters[g.key] ?? []).filter((x) => x !== val))}
+                  aria-label={`Remove ${val}`}
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            ))
+          )}
+          <button
+            onClick={clearAll}
+            className="ml-auto text-xs font-semibold text-primary hover:underline"
+          >
+            Clear all ({activeFilterCount + (q ? 1 : 0)})
+          </button>
+        </div>
+      )}
+
+      <div className="mt-6 grid gap-8 lg:grid-cols-[280px_1fr]">
+        <aside className="hidden space-y-4 lg:block">
+          <div className="rounded-3xl border bg-card p-5 shadow-soft">
+            <div className="flex items-center justify-between border-b pb-3">
+              <h2 className="font-display text-lg font-bold">Filter Dishes</h2>
+              {activeFilterCount > 0 && (
+                <button onClick={clearAll} className="text-xs font-semibold text-primary hover:underline">
+                  Reset
+                </button>
+              )}
+            </div>
+            <div className="mt-4 space-y-4">
+              {FILTER_GROUPS.map((g) => (
+                <FilterAccordion
+                  key={g.key}
+                  title={g.title}
+                  options={g.options}
+                  selected={filters[g.key] ?? []}
+                  onChange={(next) => setGroup(g.key, next)}
+                />
+              ))}
+            </div>
+          </div>
+        </aside>
+
+        {mobileFilterOpen && (
+          <div className="fixed inset-0 z-50 flex bg-cocoa/40 backdrop-blur-sm lg:hidden">
+            <div className="ml-auto flex h-full w-full max-w-sm flex-col bg-background p-6 shadow-card overflow-y-auto">
+              <div className="flex items-center justify-between border-b pb-4">
+                <h2 className="font-display text-lg font-bold">Filters ({activeFilterCount})</h2>
+                <button onClick={() => setMobileFilterOpen(false)} aria-label="Close filters">
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <div className="mt-4 flex-1 space-y-4">
+                {FILTER_GROUPS.map((g) => (
+                  <FilterAccordion
+                    key={g.key}
+                    title={g.title}
+                    options={g.options}
+                    selected={filters[g.key] ?? []}
+                    onChange={(next) => setGroup(g.key, next)}
+                  />
+                ))}
+              </div>
+              <div className="mt-6 flex gap-2 border-t pt-4">
+                <button onClick={clearAll} className="flex-1 rounded-full border py-2.5 text-sm font-semibold hover:bg-muted">
+                  Clear
+                </button>
+                <button
+                  onClick={() => setMobileFilterOpen(false)}
+                  className="flex-1 rounded-full bg-primary py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+                >
+                  Show Results ({matchingFoods.length})
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <section aria-label="Recipes list">
+          <div className="mb-4 flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Showing <span className="font-semibold text-foreground">{matchingFoods.length}</span> of {totalCount} dishes
+            </p>
+          </div>
+
+          {matchingFoods.length === 0 ? (
+            <div className="rounded-3xl border bg-card p-12 text-center shadow-soft">
+              <p className="font-display text-xl font-bold">Walang natagpuang pagkain</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Walang tumutugma sa iyong search o piniling filters.
               </p>
               <button
-                onClick={() => setPanelOpen((o) => !o)}
-                aria-expanded={panelOpen}
-                className="flex items-center gap-2 rounded-full bg-card px-4 py-2 text-sm font-bold shadow-soft lg:hidden"
+                onClick={clearAll}
+                className="mt-4 inline-flex rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
               >
-                <SlidersHorizontal className="h-4 w-4" /> Filters
-                {activeCount > 0 && <span className="grid h-5 min-w-5 place-items-center rounded-full bg-primary px-1.5 text-xs text-primary-foreground">{activeCount}</span>}
+                Clear all filters
               </button>
             </div>
-
-            {panelOpen && (
-              <div className="fade-up mt-4 rounded-3xl bg-card p-4 shadow-soft lg:hidden">
-                {panel}
-                <div className="mt-4 flex gap-2">
-                  {activeCount > 0 && <button onClick={clearAll} className="flex-1 rounded-full bg-muted px-4 py-2.5 text-sm font-bold">Clear all</button>}
-                  <button onClick={() => setPanelOpen(false)} className="flex-1 rounded-full bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground">
-                    Show {results.length} dish{results.length === 1 ? "" : "es"}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {activeCount > 0 && (
-              <div className="mt-4 flex flex-wrap items-center gap-2">
-                {active.map((a) => (
-                  <button
-                    key={`${a.key}-${a.value}`}
-                    onClick={() => toggle(a.key, a.value)}
-                    aria-label={`Remove filter ${a.label}`}
-                    className="flex items-center gap-1 rounded-full bg-secondary px-3 py-1.5 text-xs font-bold text-secondary-foreground transition-opacity hover:opacity-85"
-                  >
-                    {a.label} <X className="h-3.5 w-3.5" />
-                  </button>
-                ))}
-                <button onClick={clearAll} className="px-2 py-1.5 text-xs font-bold text-primary hover:underline">Clear All Filters</button>
-              </div>
-            )}
-
-            {results.length ? (
-              <div className="mt-6 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                {results.map((f) => <FoodCard key={f.id} food={f} />)}
-              </div>
-            ) : (
-              <div className="mt-8 rounded-3xl border border-dashed p-10 text-center">
-                <p className="text-lg font-semibold">No dishes match your search.</p>
-                <p className="mt-2 text-sm text-muted-foreground">Try a different word, or remove a filter or two.</p>
-                <button onClick={clearAll} className="mt-5 rounded-full bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground">Clear All Filters</button>
-              </div>
-            )}
-          </div>
-        </div>
+          ) : (
+            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+              {matchingFoods.map((f) => (
+                <FoodCard key={f.id} food={f} />
+              ))}
+            </div>
+          )}
+        </section>
       </div>
     </div>
   );
 }
 
-function FilterGroup({
-  label, options, selected, onToggle, defaultOpen,
+function FilterAccordion({
+  title,
+  options,
+  selected,
+  onChange,
 }: {
-  label: string;
-  options: readonly { value: string; label: string }[];
+  title: string;
+  options: readonly string[];
   selected: string[];
-  onToggle: (value: string) => void;
-  defaultOpen: boolean;
+  onChange: (next: string[]) => void;
 }) {
-  const [open, setOpen] = useState(defaultOpen || selected.length > 0);
+  const [open, setOpen] = useState(true);
+
+  const toggle = (opt: string) => {
+    if (selected.includes(opt)) {
+      onChange(selected.filter((x) => x !== opt));
+    } else {
+      onChange([...selected, opt]);
+    }
+  };
+
   return (
-    <section className="rounded-2xl bg-background/60 p-3">
-      <button onClick={() => setOpen((o) => !o)} aria-expanded={open} className="flex w-full items-center justify-between text-left text-sm font-bold">
+    <div className="border-b pb-3 last:border-b-0">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center justify-between py-1 text-left text-sm font-semibold text-foreground hover:text-primary"
+      >
         <span>
-          {label}
-          {selected.length > 0 && <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground">{selected.length}</span>}
+          {title}
+          {selected.length > 0 && <span className="ml-1 text-xs text-primary">({selected.length})</span>}
         </span>
         <ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
+
       {open && (
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {options.map((o) => {
-            const on = selected.includes(o.value);
+        <div className="mt-2 space-y-1.5 pl-1 max-h-48 overflow-y-auto">
+          {options.map((opt) => {
+            const checked = selected.includes(opt);
             return (
-              <button
-                key={o.value}
-                onClick={() => onToggle(o.value)}
-                aria-pressed={on}
-                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${on ? "bg-primary text-primary-foreground" : "bg-card hover:bg-muted"}`}
-              >
-                {o.label}
-              </button>
+              <label key={opt} className="flex cursor-pointer items-center gap-2 text-xs text-foreground/85 hover:text-foreground">
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  onChange={() => toggle(opt)}
+                  className="rounded border-input text-primary focus:ring-primary/40"
+                />
+                <span>{opt}</span>
+              </label>
             );
           })}
         </div>
       )}
-    </section>
+    </div>
   );
 }

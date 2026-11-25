@@ -1,9 +1,15 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Check, CheckCircle2, Pause, Play, RotateCcw, Timer } from "lucide-react";
+import { Check, CheckCircle2, History, Pause, Play, RotateCcw, Timer } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
 import { PageHeader } from "@/components/recipe-card";
 import { FoodImage } from "@/components/food-image";
+import { ServingAdjuster } from "@/components/serving-adjustment";
 import { getCookingSteps, getRecipe, getRecipes } from "@/lib/recipe-service";
+import { estimateCookingTime } from "@/lib/servings";
+import { saveCookingHistory } from "@/lib/history.functions";
+import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/cooking-simulator")({
   validateSearch: (s: Record<string, unknown>): { recipe?: string | undefined } => ({
@@ -24,7 +30,6 @@ export const Route = createFileRoute("/cooking-simulator")({
 
 const clock = (sec: number) => `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`;
 
-/** Countdown for one step, preset from the wait time written in the step. */
 function StepTimer({ minutes }: { minutes: number | undefined }) {
   const [remaining, setRemaining] = useState((minutes ?? 0) * 60);
   const [running, setRunning] = useState(false);
@@ -68,26 +73,73 @@ function StepTimer({ minutes }: { minutes: number | undefined }) {
 function Simulator() {
   const { recipe: rid } = Route.useSearch();
   const navigate = useNavigate({ from: "/cooking-simulator" });
+  const { user } = useAuth();
+  const recordHistory = useServerFn(saveCookingHistory);
+
   const recipe = getRecipe(rid ?? "") ?? getRecipes()[0]!;
   const steps = getCookingSteps(recipe);
   const [step, setStep] = useState(0);
-  useEffect(() => setStep(0), [recipe.id]);
+  const [servings, setServings] = useState(recipe.servings);
+  const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setStep(0);
+    setServings(recipe.servings);
+    setSaved(false);
+  }, [recipe.id]);
+
   const done = step >= steps.length;
   const current = steps[Math.min(step, steps.length - 1)]!;
   const pct = Math.round((Math.min(step, steps.length) / steps.length) * 100);
+
+  async function handleSaveHistory() {
+    if (!user) {
+      toast.info("Please sign in to save dishes to your Cooking History.");
+      return;
+    }
+    try {
+      setSaving(true);
+      const estimate = estimateCookingTime(recipe, servings);
+      await recordHistory({
+        data: {
+          recipeId: recipe.id,
+          recipeName: recipe.name,
+          recipeImage: recipe.image,
+          servings,
+          estimatedMinMinutes: estimate.minMinutes,
+          estimatedMaxMinutes: estimate.maxMinutes,
+          completionKey: crypto.randomUUID(),
+        },
+      });
+      setSaved(true);
+      toast.success(`Saved ${recipe.name} (${servings} servings) to your Cooking History!`);
+    } catch {
+      toast.error("Could not save to history. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <div>
       <PageHeader title="Cooking Simulator" subtitle="A guided, step-by-step walkthrough with a photo and timer for every step." />
       <div className="mx-auto max-w-3xl px-4 sm:px-6">
-        <select
-          value={recipe.id}
-          onChange={(e) => navigate({ search: { recipe: e.target.value } })}
-          aria-label="Choose recipe"
-          className="rounded-full border bg-card px-4 py-2 font-semibold"
-        >
-          {getRecipes().map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
-        </select>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <select
+            value={recipe.id}
+            onChange={(e) => navigate({ search: { recipe: e.target.value } })}
+            aria-label="Choose recipe"
+            className="rounded-full border bg-card px-4 py-2 font-semibold shadow-soft"
+          >
+            {getRecipes().map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
+          </select>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-muted-foreground">Portions:</span>
+            <ServingAdjuster servings={servings} onChange={setServings} />
+          </div>
+        </div>
 
         {/* Stage indicator */}
         <ol className="mt-6 flex gap-1.5 sm:gap-2" aria-label="Cooking stages">
@@ -140,7 +192,30 @@ function Simulator() {
               <div className="fade-up text-center">
                 <CheckCircle2 className="mx-auto h-12 w-12 text-secondary" />
                 <h2 className="mt-3 text-2xl font-semibold">Luto na! Your {recipe.name} is ready.</h2>
-                <button onClick={() => setStep(0)} className="mt-6 rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground">Cook again</button>
+                <p className="mt-2 text-sm text-muted-foreground">Cooked for {servings} {servings === 1 ? "serving" : "servings"}.</p>
+                <div className="mt-6 flex flex-wrap justify-center gap-3">
+                  <button onClick={() => setStep(0)} className="rounded-full bg-muted px-6 py-3 text-sm font-bold hover:bg-accent">
+                    Cook again
+                  </button>
+                  {saved ? (
+                    <span className="inline-flex items-center gap-2 rounded-full bg-secondary px-6 py-3 text-sm font-bold text-secondary-foreground">
+                      <Check className="h-4 w-4" /> Saved in History
+                    </span>
+                  ) : (
+                    <button
+                      onClick={handleSaveHistory}
+                      disabled={saving}
+                      className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-bold text-primary-foreground hover:opacity-90 disabled:opacity-50"
+                    >
+                      <History className="h-4 w-4" /> {saving ? "Saving..." : "Save to Cooking History"}
+                    </button>
+                  )}
+                  {user && (
+                    <Link to="/cooking-history" className="rounded-full border border-primary px-5 py-3 text-sm font-bold text-primary hover:bg-primary hover:text-primary-foreground">
+                      View History
+                    </Link>
+                  )}
+                </div>
               </div>
             ) : (
               <div key={step} className="fade-up">
@@ -150,7 +225,7 @@ function Simulator() {
                 <div className="mt-8 flex justify-between">
                   <button disabled={step === 0} onClick={() => setStep((s) => s - 1)} className="rounded-full bg-muted px-5 py-2.5 text-sm font-bold disabled:opacity-40">Back</button>
                   <button onClick={() => setStep((s) => s + 1)} className="rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground">
-                    {step === steps.length - 1 ? "Finish" : "Next step"}
+                    {step === steps.length - 1 ? "Finish & Done" : "Next step"}
                   </button>
                 </div>
               </div>

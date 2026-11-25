@@ -1,13 +1,15 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState } from "react";
-import { Calculator, ChefHat, Clock, Flame, MapPin, Minus, Plus, Tag, Utensils, Wallet } from "lucide-react";
+import { Calculator, ChefHat, Clock, Flame, MapPin, Tag, Utensils, Wallet } from "lucide-react";
 import { FavoriteButton } from "@/components/recipe-card";
 import { FoodCard } from "@/components/food-card";
 import { FoodImage } from "@/components/food-image";
+import { ServingAdjuster, CookingTimeGuidance } from "@/components/serving-adjustment";
 import { BUDGETS } from "@/data/food-filters";
 import {
   getCategoryName, getFood, getRecipe, getSimilarFoods, ingredientCost, peso, pesoWhole, totalCost, type Food,
 } from "@/lib/recipe-service";
+import { formatQuantity, scaleIngredients } from "@/lib/servings";
 import type { Recipe } from "@/data/recipes";
 
 export const Route = createFileRoute("/recipes/$recipeId")({
@@ -144,30 +146,31 @@ function KeyIngredients({ food }: { food: Food }) {
 
 function FullRecipe({ recipe }: { recipe: Recipe }) {
   const [servings, setServings] = useState(recipe.servings);
+  const scaled = scaleIngredients(recipe.ingredients, recipe.servings, servings);
   const scale = servings / recipe.servings;
   const total = totalCost(recipe.ingredients, scale);
 
   return (
     <>
-      <div className="mt-10 flex flex-wrap items-center gap-3 text-sm">
-        <span className="flex items-center gap-1 rounded-full bg-card px-3 py-1.5"><Clock className="h-4 w-4" />Prep {recipe.prepMinutes}m · Cook {recipe.cookMinutes}m</span>
-        <span className="flex items-center gap-1 rounded-full bg-card px-3 py-1.5"><Flame className="h-4 w-4" />{recipe.difficulty}</span>
-        <div className="flex items-center gap-2 rounded-full bg-card p-1 shadow-soft">
-          <button aria-label="Fewer servings" onClick={() => setServings((s) => Math.max(1, s - 1))} className="grid h-9 w-9 place-items-center rounded-full hover:bg-muted"><Minus className="h-4 w-4" /></button>
-          <span className="w-24 text-center text-sm font-bold">{servings} servings</span>
-          <button aria-label="More servings" onClick={() => setServings((s) => Math.min(50, s + 1))} className="grid h-9 w-9 place-items-center rounded-full hover:bg-muted"><Plus className="h-4 w-4" /></button>
-        </div>
-        <p>Ingredient total <span className="text-xl font-bold text-primary">{peso(total)}</span> · {peso(total / servings)}/serving</p>
+      <div className="mt-10 flex flex-wrap items-center gap-4 text-sm">
+        <span className="flex items-center gap-1 rounded-full bg-card px-3 py-1.5 shadow-soft"><Clock className="h-4 w-4" />Prep {recipe.prepMinutes}m · Cook {recipe.cookMinutes}m</span>
+        <span className="flex items-center gap-1 rounded-full bg-card px-3 py-1.5 shadow-soft"><Flame className="h-4 w-4" />{recipe.difficulty}</span>
+        <ServingAdjuster servings={servings} onChange={setServings} />
+        <p className="font-medium">Total: <span className="text-xl font-bold text-primary">{peso(total)}</span> <span className="text-muted-foreground">({peso(total / servings)}/serving)</span></p>
+      </div>
+
+      <div className="mt-6">
+        <CookingTimeGuidance recipe={recipe} servings={servings} />
       </div>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-5">
         <section className="rounded-3xl bg-card p-6 shadow-soft lg:col-span-2">
-          <h2 className="text-2xl font-semibold">Ingredients</h2>
+          <h2 className="text-2xl font-semibold">Ingredients ({servings} servings)</h2>
           <ul className="mt-4 divide-y">
-            {recipe.ingredients.map((i) => (
+            {scaled.map((i) => (
               <li key={i.name} className="flex justify-between gap-3 py-2.5 text-sm">
-                <span><b>{+(i.quantity * scale).toFixed(2)} {i.unit}</b> {i.name}</span>
-                <span className="text-muted-foreground">{peso(ingredientCost(i, scale))}</span>
+                <span><b>{formatQuantity(i.quantity, i.unit)}</b> {i.name}</span>
+                <span className="text-muted-foreground">{peso(ingredientCost(i, 1))}</span>
               </li>
             ))}
           </ul>
@@ -177,6 +180,11 @@ function FullRecipe({ recipe }: { recipe: Recipe }) {
         </section>
         <section className="lg:col-span-3">
           <h2 className="text-2xl font-semibold">How to cook</h2>
+          {recipe.notes?.length ? (
+            <div className="mt-3 rounded-2xl bg-secondary/15 p-4 text-sm text-foreground">
+              {recipe.notes.map((note, index) => <p key={index}>{note}</p>)}
+            </div>
+          ) : null}
           <ol className="mt-4 space-y-4">
             {recipe.steps.map((s, idx) => (
               <li key={idx} className="flex gap-4">
