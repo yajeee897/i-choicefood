@@ -14,6 +14,90 @@ export type Database = {
   }
   public: {
     Tables: {
+      recipes: {
+        Row: {
+          id: string
+          name: string
+          tagline: string
+          description: string
+          region: string
+          image: string
+          servings: number
+          prep_minutes: number
+          cook_minutes: number
+          difficulty: string
+          featured: boolean
+          popularity: number
+          ingredients: Json
+          steps: Json
+          notes: Json
+          published: boolean
+          created_by: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          tagline?: string
+          description?: string
+          region?: string
+          image?: string
+          servings?: number
+          prep_minutes?: number
+          cook_minutes?: number
+          difficulty?: string
+          featured?: boolean
+          popularity?: number
+          ingredients?: Json
+          steps?: Json
+          notes?: Json
+          published?: boolean
+          created_by: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          tagline?: string
+          description?: string
+          region?: string
+          image?: string
+          servings?: number
+          prep_minutes?: number
+          cook_minutes?: number
+          difficulty?: string
+          featured?: boolean
+          popularity?: number
+          ingredients?: Json
+          steps?: Json
+          notes?: Json
+          published?: boolean
+          created_by?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          user_id: string
+          role: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          role: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          role?: string
+        }
+        Relationships: []
+      }
       cooking_history: {
         Row: {
           completion_key: string
@@ -90,7 +174,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
